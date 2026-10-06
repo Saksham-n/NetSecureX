@@ -1,0 +1,15 @@
+# Core dependencies
+aiosmtpd>=1.4.6
+dnspython>=2.6.1
+pyspf>=2.0.14
+dkimpy>=1.1.8
+authres>=1.2.0
+requests>=2.31.0
+httpx>=0.27.0
+pyyaml>=6.0.1
+sqlalchemy>=2.0.30
+flask>=3.0.0
+
+# Optional milter interface (for native C libmilter environments on Linux)
+# Note: pymilter requires libmilter-dev on Linux (e.g. apt-get install libmilter-dev)
+# pymilter>=1.0.5
