@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NetSecureX — College Demo & Threat Scanner Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0b0f19;
+            --bg-secondary: #111827;
+            --bg-card: rgba(17, 24, 39, 0.85);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-yellow: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-purple: #8b5cf6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 24px;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .badge-college {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #34d399;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 18px 20px;
+            backdrop-filter: blur(8px);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .stat-val {
+            font-size: 28px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Main 2-column layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Quick Attack Buttons */
+        .quick-attacks {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .attack-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+
+        .attack-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--accent-blue);
+            transform: translateY(-1px);
+        }
+
+        .attack-tag {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .tag-red { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+        .tag-yellow { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
+        .tag-green { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+
+        /* Form Inputs */
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 13px;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 6px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit:hover {
+            opacity: 0.9;
+        }
+
+        /* Scan Log Table */
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th {
+            text-align: left;
+            padding: 10px 14px;
+            color: var(--text-secondary);
+            font-size: 11px;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .risk-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .badge-allow { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge-tag { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .badge-reject { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .badge-quarantine { background: rgba(139, 92, 246, 0.15); color: #c084fc; border: 1px solid rgba(139, 92, 246, 0.3); }
+
+        .score-box {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+        }
+
+        .score-low { color: #34d399; }
+        .score-med { color: #fbbf24; }
+        .score-high { color: #f87171; }
+
+        .email-addr {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .refresh-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .refresh-btn:hover {
+            color: #fff;
+            border-color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-area">
+                <span class="badge-college">College Project Edition</span>
+                <h1>NetSecureX MTA Mail Threat Interceptor</h1>
+            </div>
+            <div class="status-pill">
+                <div class="pulse-dot"></div>
+                <span>Gateway Active (SMTP Port 10025)</span>
+            </div>
+        </header>
+
+        <!-- Stats Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Intercepted</div>
+                <div class="stat-val" id="stat-total">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Low Risk (Delivered)</div>
+                <div class="stat-val score-low" id="stat-allow">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Medium Risk (Tagged)</div>
+                <div class="stat-val score-med" id="stat-tagged">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">High Risk (Quarantined/Blocked)</div>
+                <div class="stat-val score-high" id="stat-blocked">0</div>
+            </div>
+        </div>
+
+        <div class="main-layout">
+            <!-- Left Column: Attack Simulation & Custom Injection -->
+            <div class="left-col">
+                <div class="card" style="margin-bottom: 24px;">
+                    <div class="card-header">
+                        <div class="card-title">🚀 1-Click Attack Simulator</div>
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 14px;">
+                        Trigger pre-built phishing and threat email vectors directly through the MTA gateway to demonstrate detection live:
+                    </p>
+                    <div class="quick-attacks">
+                        <button class="attack-btn" onclick="sendQuickVector('vip_spoof')">
+                            <div>
+                                <strong>VIP CEO Impersonation</strong>
+                                <div style="font-size: 11px; color: var(--text-secondary);">Spoofed display name & wire transfer request</div>
+                            </div>
+                            <span class="attack-tag tag-red">High Risk</span>
+                        </button>
+
+                        <button class="attack-btn" onclick="sendQuickVector('attachment')">
+                            <div>
+                                <strong>Malware Attachment</strong>
+                                <div style="font-size: 11px; color: var(--text-secondary);">Double extension payload (invoice.pdf.exe)</div>
+                            </div>
+                            <span class="attack-tag tag-red">High Risk</span>
+                        </button>
+
+                        <button class="attack-btn" onclick="sendQuickVector('urgency')">
+                            <div>
+                                <strong>Urgency / Extortion Phish</strong>
+                                <div style="font-size: 11px; color: var(--text-secondary);">Account suspension & crypto extortion triggers</div>
+                            </div>
+                            <span class="attack-tag tag-yellow">Medium</span>
+                        </button>
+
+                        <button class="attack-btn" onclick="sendQuickVector('lookalike')">
+                            <div>
+                                <strong>Typosquatted Domain</strong>
+                                <div style="font-size: 11px; color: var(--text-secondary);">c0mpany.com lookalike domain link</div>
+                            </div>
+                            <span class="attack-tag tag-yellow">Medium</span>
+                        </button>
+
+                        <button class="attack-btn" onclick="sendQuickVector('clean')">
+                            <div>
+                                <strong>Legitimate Corporate Mail</strong>
+                                <div style="font-size: 11px; color: var(--text-secondary);">Normal internal communication</div>
+                            </div>
+                            <span class="attack-tag tag-green">Clean</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Custom Email Injector -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">✉️ Custom SMTP Email Injector</div>
+                    </div>
+                    <form id="customMailForm" onsubmit="handleCustomSend(event)">
+                        <div class="form-group">
+                            <label>Envelope Sender (MAIL FROM)</label>
+                            <input type="email" id="mailFrom" value="scammer@external-freemail.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Envelope Recipient (RCPT TO)</label>
+                            <input type="email" id="mailTo" value="target.employee@company.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label>From Header (Display Name)</label>
+                            <input type="text" id="headerFrom" value='"CEO John Doe <ceo@company.com>" <scammer@external-freemail.com>' required>
+                        </div>
+                        <div class="form-group">
+                            <label>Subject</label>
+                            <input type="text" id="mailSubject" value="URGENT: Process emergency gift card wire transfer now" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email Body</label>
+                            <textarea id="mailBody" rows="4" required>Please update payroll direct deposit and verify your password immediately.</textarea>
+                        </div>
+                        <button type="submit" class="btn-submit" id="btnSend">⚡ Intercept & Scan Message</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right Column: Real-time Interception Table -->
+            <div class="right-col">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">📡 Live In-Transit Interception Log</div>
+                        <button class="refresh-btn" onclick="fetchLogs()">🔄 Refresh</button>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Sender & Subject</th>
+                                    <th>Auth (SPF/DKIM/DMARC)</th>
+                                    <th>Risk Score</th>
+                                    <th>Action Taken</th>
+                                    <th>Analysis Breakdown</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logsTbody">
+                                <tr>
+                                    <td colspan="6" class="empty-state">No emails intercepted yet. Click a quick attack button on the left to test!</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function fetchLogs() {
+            try {
+                const res = await fetch('/api/logs');
+                const data = await res.json();
+                renderLogs(data.logs);
+                updateStats(data.stats);
+            } catch (err) {
+                console.error("Failed to fetch logs:", err);
+            }
+        }
+
+        function renderLogs(logs) {
+            const tbody = document.getElementById('logsTbody');
+            if (!logs || logs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No emails intercepted yet. Click a quick attack button on the left to test!</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = logs.map(log => {
+                let badgeClass = 'badge-allow';
+                if (log.action_taken === 'REJECT') badgeClass = 'badge-reject';
+                else if (log.action_taken === 'QUARANTINE') badgeClass = 'badge-quarantine';
+                else if (log.action_taken === 'TAG') badgeClass = 'badge-tag';
+
+                let scoreClass = 'score-low';
+                if (log.total_score >= 70) scoreClass = 'score-high';
+                else if (log.total_score >= 30) scoreClass = 'score-med';
+
+                return `
+                    <tr>
+                        <td class="mono">#${log.id}</td>
+                        <td>
+                            <strong>${escapeHtml(log.subject || 'No Subject')}</strong>
+                            <div class="email-addr">From: ${escapeHtml(log.sender)}</div>
+                            <div class="email-addr">To: ${escapeHtml(log.recipient)}</div>
+                        </td>
+                        <td class="mono" style="font-size: 11px;">
+                            <div>SPF: <span style="color: ${log.spf_status === 'pass' ? '#34d399' : '#f87171'}">${log.spf_status || 'none'}</span></div>
+                            <div>DKIM: ${log.dkim_status || 'none'}</div>
+                            <div>DMARC: ${log.dmarc_status || 'none'}</div>
+                        </td>
+                        <td>
+                            <span class="score-box ${scoreClass}">${log.total_score.toFixed(1)} / 100</span>
+                        </td>
+                        <td>
+                            <span class="risk-badge ${badgeClass}">${log.action_taken}</span>
+                        </td>
+                        <td style="font-size: 12px; color: var(--text-secondary); max-width: 320px;">
+                            ${escapeHtml(log.summary_report || 'Clean')}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateStats(stats) {
+            if (!stats) return;
+            document.getElementById('stat-total').innerText = stats.total || 0;
+            document.getElementById('stat-allow').innerText = stats.allow || 0;
+            document.getElementById('stat-tagged').innerText = stats.tagged || 0;
+            document.getElementById('stat-blocked').innerText = stats.blocked || 0;
+        }
+
+        async function sendQuickVector(vectorName) {
+            try {
+                const res = await fetch('/api/simulate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ vector: vectorName })
+                });
+                const data = await res.json();
+                fetchLogs();
+            } catch (err) {
+                alert("Error triggering attack simulation: " + err);
+            }
+        }
+
+        async function handleCustomSend(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSend');
+            btn.disabled = true;
+            btn.innerText = "Scanning in transit...";
+
+            const payload = {
+                mail_from: document.getElementById('mailFrom').value,
+                mail_to: document.getElementById('mailTo').value,
+                header_from: document.getElementById('headerFrom').value,
+                subject: document.getElementById('mailSubject').value,
+                body: document.getElementById('mailBody').value,
+            };
+
+            try {
+                const res = await fetch('/api/send_custom', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                fetchLogs();
+            } catch (err) {
+                alert("Error injecting email: " + err);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "⚡ Intercept & Scan Message";
+            }
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        // Auto poll logs every 2 seconds
+        setInterval(fetchLogs, 2000);
+        fetchLogs();
+    </script>
+</body>
+</html>
