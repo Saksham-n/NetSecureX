@@ -1,0 +1,31 @@
+FROM python:3.11-slim-bullseye
+
+# Install system build dependencies for libmilter and dns
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libmilter-dev \
+    libmilter1.0.1 \
+    libssl-dev \
+    libffi-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy requirements and install
+COPY requirements.txt requirements-dev.txt ./
+RUN pip install --no-cache-dir -r requirements.txt pymilter
+
+# Copy application code
+COPY . /app
+
+# Create unprivileged service user and data directory
+RUN useradd -u 1000 -r -s /bin/false netsecurex && \
+    mkdir -p /app/data && \
+    chown -R netsecurex:netsecurex /app
+
+USER netsecurex
+
+EXPOSE 10025 8899
+
+CMD ["python", "scripts/run_scanner.py", "--config", "config/config.yaml.example"]

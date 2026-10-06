@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  # NetSecureX Mail Scanning Intermediary Gateway
+  netsecurex-scanner:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.scanner
+    container_name: netsecurex-scanner
+    restart: unless-stopped
+    ports:
+      - "10025:10025"
+      - "8899:8899"
+    environment:
+      - NETSECUREX_SERVER_MODE=proxy
+      - NETSECUREX_PORT=10025
+      - NETSECUREX_DB_URL=sqlite:////app/data/netsecurex.db
+      - SAFE_BROWSING_API_KEY=${SAFE_BROWSING_API_KEY:-}
+      - VIRUSTOTAL_API_KEY=${VIRUSTOTAL_API_KEY:-}
+    volumes:
+      - scanner-data:/app/data
+    depends_on:
+      - mailhog
+    networks:
+      - mailnet
+
+  # Mock Recipient Mailbox & Web UI for Sandbox Verification
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: netsecurex-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"    # SMTP inbound port
+      - "8025:8025"    # Web UI port (http://localhost:8025)
+    networks:
+      - mailnet
+
+volumes:
+  scanner-data:
+
+networks:
+  mailnet:
+    driver: bridge
