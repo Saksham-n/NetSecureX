@@ -1,0 +1,45 @@
+[Unit]
+Description=NetSecureX MTA Email Threat Scanner Service
+Documentation=https://github.com/netsecurex/netsecurex
+After=network.target network-online.target systemd-resolved.service
+Wants=network-online.target
+Before=postfix.service
+
+[Service]
+Type=simple
+User=netsecurex
+Group=netsecurex
+WorkingDirectory=/opt/netsecurex
+EnvironmentFile=-/etc/netsecurex/netsecurex.env
+ExecStart=/opt/netsecurex/.venv/bin/python /opt/netsecurex/scripts/run_scanner.py --config /etc/netsecurex/config.yaml
+
+# Process Lifecycle & Recovery
+Restart=always
+RestartSec=5s
+TimeoutStopSec=20s
+
+# Security Sandboxing & Hardening
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/log/netsecurex /var/lib/netsecurex /var/run/netsecurex
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictRealtime=true
+RestrictNamespaces=true
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
+
+# Resource Limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=netsecurex
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,12 @@
+# Postfix Transport Mapping Table
+# File: /etc/postfix/transport
+# Map incoming recipient domain to internal mail server / Dovecot / Exchange
+
+# Examples:
+# company.com       smtp:[mail.internal.company.com]:25
+# security.local    smtp:[mailhog.local]:1025
+# *                 smtp:[downstream-exchange.corp.local]:25
+
+company.com         smtp:[127.0.0.1]:1025
+netsecurex.local    smtp:[127.0.0.1]:1025
+*                   smtp:[127.0.0.1]:1025

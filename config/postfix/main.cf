@@ -1,0 +1,58 @@
+# Postfix Gateway Configuration for NetSecureX Mail Scanning Intermediary
+# File: /etc/postfix/main.cf
+
+# 1. System Identification
+myhostname = gateway.netsecurex.local
+mydomain = netsecurex.local
+myorigin = $mydomain
+mydestination = localhost.$mydomain, localhost
+mynetworks = 127.0.0.0/8 [::1]/128 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16
+inet_interfaces = all
+inet_protocols = all
+
+# 2. Relay & Transport Routing
+# Route incoming scanned domains to downstream final mailbox / Exchange / Dovecot
+relay_domains = hash:/etc/postfix/relay_domains
+transport_maps = hash:/etc/postfix/transport
+
+# 3. Message Size Limits
+message_size_limit = 26214400
+mailbox_size_limit = 0
+
+# 4. SMTP Restrictions (Pre-DATA evaluation)
+smtpd_helo_required = yes
+smtpd_helo_restrictions =
+    permit_mynetworks,
+    reject_non_fqdn_helo_hostname,
+    reject_invalid_helo_hostname,
+    permit
+
+smtpd_sender_restrictions =
+    permit_mynetworks,
+    reject_non_fqdn_sender,
+    reject_unknown_sender_domain,
+    permit
+
+smtpd_recipient_restrictions =
+    permit_mynetworks,
+    reject_unauth_destination,
+    reject_non_fqdn_recipient,
+    reject_unknown_recipient_domain,
+    permit
+
+# 5. NetSecureX Milter Integration (In-Transit Inspection Hook)
+# Options: TCP socket (inet:127.0.0.1:8899) or UNIX socket (unix:/var/spool/postfix/netsecurex/milter.sock)
+smtpd_milters = inet:127.0.0.1:8899
+non_smtpd_milters = inet:127.0.0.1:8899
+milter_default_action = accept
+milter_connect_macros = j {daemon_name} v {client_ptr} _
+milter_command_timeout = 30s
+milter_content_timeout = 60s
+
+# 6. TLS Security
+smtpd_tls_security_level = may
+smtpd_tls_cert_file = /etc/ssl/certs/ssl-cert-snakeoil.pem
+smtpd_tls_key_file = /etc/ssl/private/ssl-cert-snakeoil.key
+smtpd_tls_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1
+smtpd_tls_ciphers = medium
+smtp_tls_security_level = may

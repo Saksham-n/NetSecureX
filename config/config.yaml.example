@@ -1,0 +1,84 @@
+# NetSecureX Mail Gateway Scanner Configuration
+
+server:
+  # Mode: "proxy" (aiosmtpd transparent SMTP filter/proxy) or "milter" (postfix smtpd_milters hook)
+  mode: "proxy"
+  host: "0.0.0.0"
+  port: 10025
+  # For milter mode: socket path or inet address (e.g. inet:8899@127.0.0.1 or unix:/var/run/netsecurex/milter.sock)
+  milter_socket: "inet:8899@127.0.0.1"
+  # Downstream MTA destination for proxy mode (where scanned accepted emails are forwarded)
+  downstream_host: "127.0.0.1"
+  downstream_port: 1025
+  max_message_size_bytes: 26214400  # 25 MB
+
+database:
+  # SQLite or PostgreSQL URI
+  url: "sqlite:///netsecurex.db"
+  echo: false
+
+decision_engine:
+  # Risk thresholds (0 to 100)
+  medium_risk_threshold: 30
+  high_risk_threshold: 70
+  
+  # Action when score >= high_risk_threshold: "reject" (550 SMTP error) or "quarantine"
+  high_risk_action: "quarantine"
+  
+  # Action when medium_risk_threshold <= score < high_risk_threshold: "tag"
+  medium_risk_action: "tag"
+  
+  # Subject tag prefix for medium risk
+  subject_tag_prefix: "[SUSPECTED PHISHING]"
+  
+  # Quarantine delivery recipient or mailbox if high_risk_action is "quarantine"
+  quarantine_recipient: "quarantine@security.local"
+
+api_keys:
+  # Google Safe Browsing API v4 Key (optional, leave blank to skip API lookup)
+  google_safe_browsing: ""
+  # VirusTotal API v3 Key (optional, leave blank to skip API lookup)
+  virustotal: ""
+
+performance:
+  # External lookup timeout in seconds (fail gracefully if exceeded)
+  api_timeout_seconds: 2.5
+  # Cache TTL in seconds for URL / Attachment reputation
+  cache_ttl_seconds: 86400
+  # Max cache entries
+  cache_max_entries: 10000
+
+heuristics:
+  # Protected executive or VIP names to monitor for display-name spoofing
+  protected_vip_names:
+    - "CEO"
+    - "Chief Executive Officer"
+    - "Finance Director"
+    - "Payroll Dept"
+    - "HR Department"
+    - "IT Helpdesk"
+    - "Security Administrator"
+
+  # Legitimate internal/corporate domains (for spoofing & lookalike detection)
+  protected_domains:
+    - "company.com"
+    - "corp.internal"
+
+  # Urgency & coercion keyword triggers
+  urgency_keywords:
+    - "urgent action required"
+    - "immediate response needed"
+    - "account suspended"
+    - "wire transfer"
+    - "gift card"
+    - "verify your password"
+    - "payroll direct deposit"
+    - "unauthorized sign-in attempt"
+    - "final warning"
+    - "overdue invoice"
+    - "crypto payment"
+
+logging:
+  level: "INFO"
+  format: "json"  # "json" or "text"
+  log_file: "netsecurex.log"
