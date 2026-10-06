@@ -3,7 +3,7 @@
 [![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)](#running-tests)
 [![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://python.org)
 [![MTA](https://img.shields.io/badge/MTA-Postfix%20%7C%20Milter%20%7C%20SMTP%20Proxy-orange.svg)](#mail-flow-architecture)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](#license)
+[![License](https://img.shields.io/badge/license-free%20to%20use-blue.svg)](#license)
 
 **NetSecureX** is a high-performance Mail Transfer Agent (MTA) scanning gateway and milter filter designed to intercept emails in transit — before they reach recipient inboxes — and inspect them for phishing, executive spoofing, malware attachments, and domain impersonation.
 
@@ -232,4 +232,4 @@ heuristics:
 
 ## License
 
-This project is licensed under the MIT License.
+Free to use. Do whatever you want with it.
