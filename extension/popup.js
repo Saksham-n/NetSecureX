@@ -45,17 +45,18 @@ async function apiPost(endpoint, payload) {
 // ─── Server Status Ping ────────────────────────────────────────────────────
 async function checkServerStatus() {
   const dot = $("server-status");
+  const offlineWarn = $("offline-warn");
   try {
-    const resp = await fetch(`${API_BASE}/api/logs`, { method: "GET" });
+    const resp = await fetch(`${API_BASE}/api/logs`, { method: "GET", signal: AbortSignal.timeout(3000) });
     if (resp.ok) {
       dot.className = "status-dot status-online";
       dot.title = "NetSecureX server online";
-    } else {
-      throw new Error("not ok");
-    }
+      offlineWarn.classList.add("hidden");
+    } else throw new Error("not ok");
   } catch {
     dot.className = "status-dot status-offline";
     dot.title = "NetSecureX server offline — start app.py";
+    offlineWarn.classList.remove("hidden");
   }
 }
 
@@ -286,3 +287,9 @@ $("btn-scan-all-links").addEventListener("click", async () => {
 // ─── Init ──────────────────────────────────────────────────────────────────
 checkServerStatus();
 loadPageInfo();
+
+// Settings links
+const openSettingsFooter = $("open-settings-footer");
+const openSettingsInline = $("open-settings");
+if (openSettingsFooter) openSettingsFooter.addEventListener("click", e => { e.preventDefault(); chrome.runtime.openOptionsPage(); });
+if (openSettingsInline)  openSettingsInline.addEventListener("click",  e => { e.preventDefault(); chrome.runtime.openOptionsPage(); });

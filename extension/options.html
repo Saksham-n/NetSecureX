@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NetSecureX — Settings</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #080c14; --card: #0e1420; --border: rgba(255,255,255,0.1);
+      --txt1: #f0f4ff; --txt2: #8b97b8; --txt3: #4b5675;
+      --accent: #3b82f6; --green: #10b981; --red: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg); color: var(--txt1);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 14px; padding: 32px;
+      min-height: 100vh;
+    }
+    .container { max-width: 520px; margin: 0 auto; }
+    h1 {
+      font-size: 22px; font-weight: 800; margin-bottom: 4px;
+      background: linear-gradient(90deg, #60a5fa, #a78bfa);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle { color: var(--txt3); font-size: 13px; margin-bottom: 28px; }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px; margin-bottom: 16px;
+    }
+    .card-title { font-weight: 700; font-size: 13px; margin-bottom: 14px; color: var(--txt2); letter-spacing: 0.04em; text-transform: uppercase; }
+    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    label { font-size: 12px; color: var(--txt2); font-weight: 600; }
+    input[type="text"], input[type="url"] {
+      background: #141b2d; border: 1px solid var(--border);
+      border-radius: 8px; color: var(--txt1);
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      padding: 9px 12px; outline: none; width: 100%;
+      transition: border-color 0.15s;
+    }
+    input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(59,130,246,0.2); }
+    .hint { font-size: 11px; color: var(--txt3); }
+
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .toggle-label { font-size: 13px; color: var(--txt1); }
+    .toggle-desc  { font-size: 11px; color: var(--txt3); margin-top: 2px; }
+    .toggle {
+      position: relative; display: inline-block;
+      width: 42px; height: 24px; cursor: pointer; flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; inset: 0; border-radius: 24px;
+      background: #1f2937; transition: background 0.2s;
+    }
+    .slider::before {
+      content: ""; position: absolute;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: white; left: 3px; bottom: 3px;
+      transition: transform 0.2s;
+    }
+    .toggle input:checked + .slider { background: var(--accent); }
+    .toggle input:checked + .slider::before { transform: translateX(18px); }
+
+    .btn-row { display: flex; gap: 10px; }
+    .btn {
+      padding: 9px 20px; border-radius: 8px; border: none;
+      font-family: inherit; font-size: 13px; font-weight: 700;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .btn-save {
+      background: linear-gradient(135deg, #3b82f6, #6366f1);
+      color: white; flex: 1;
+    }
+    .btn-save:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-test { background: #141b2d; color: var(--txt2); border: 1px solid var(--border); }
+    .btn-test:hover { color: var(--txt1); }
+
+    .status-msg {
+      margin-top: 12px; padding: 8px 12px; border-radius: 7px;
+      font-size: 12px; font-weight: 600; display: none;
+    }
+    .status-ok  { background: rgba(16,185,129,0.15); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
+    .status-err { background: rgba(239,68,68,0.12);  color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+    .status-msg.show { display: block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🛡️ NetSecureX Settings</h1>
+    <p class="subtitle">Configure your Phishing &amp; Link Shield extension</p>
+
+    <div class="card">
+      <div class="card-title">Server Connection</div>
+      <div class="field">
+        <label for="server-url">NetSecureX Server URL</label>
+        <input type="url" id="server-url" placeholder="http://127.0.0.1:5000" value="http://127.0.0.1:5000">
+        <span class="hint">The URL where app.py is running. Default: http://127.0.0.1:5000</span>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-save" id="btn-save">💾 Save Settings</button>
+        <button class="btn btn-test" id="btn-test">🔌 Test Connection</button>
+      </div>
+      <div id="status-msg" class="status-msg"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Scanning Behaviour</div>
+
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Auto-scan page links</div>
+          <div class="toggle-desc">Annotate external links on every page with risk badges</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="tog-links" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Gmail / Outlook auto-scan</div>
+          <div class="toggle-desc">Show threat banner when viewing emails in webmail</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="tog-email" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Local heuristic fallback</div>
+          <div class="toggle-desc">Use offline pattern checks when server is unavailable</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="tog-local" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Desktop notifications</div>
+          <div class="toggle-desc">Show notification when right-click scanning a link</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="tog-notif" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">About</div>
+      <div style="color: var(--txt2); font-size: 12px; line-height: 1.8;">
+        <strong style="color:var(--txt1)">NetSecureX Phishing &amp; Link Shield</strong> v1.0.0<br>
+        College Project — Anti-Phishing MTA Gateway with Browser Extension<br><br>
+        Detects: Malicious URLs (Google Safe Browsing) · Urgency Language ·
+        Display Name Spoofing · Lookalike/Typosquatted Domains ·
+        SPF/DKIM/DMARC Failures · Malicious Attachments (VirusTotal)
+      </div>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

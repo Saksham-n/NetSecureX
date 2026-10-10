@@ -112,10 +112,19 @@
     <div class="links-list" id="page-links-list"></div>
   </div>
 
+  <!-- ── Offline Warning ──────────────────────────────────────────── -->
+  <div id="offline-warn" class="hidden" style="background:rgba(239,68,68,0.1);border-bottom:1px solid rgba(239,68,68,0.25);padding:7px 16px;font-size:11px;color:#fca5a5;display:flex;align-items:center;gap:8px;">
+    <span>⚠️</span>
+    <span>Server offline — using <strong>local heuristics only</strong>. <a id="open-settings" href="#" style="color:#93c5fd">Check Settings</a></span>
+  </div>
+
   <!-- ── Footer ─────────────────────────────────────────────────── -->
   <footer>
     <span>NetSecureX · College Project</span>
-    <a href="http://127.0.0.1:5000" target="_blank" id="open-dashboard">Open Dashboard →</a>
+    <div style="display:flex;gap:12px;align-items:center">
+      <a href="#" id="open-settings-footer" title="Settings">⚙️ Settings</a>
+      <a href="http://127.0.0.1:5000" target="_blank" id="open-dashboard">Dashboard →</a>
+    </div>
   </footer>
 
   <script src="popup.js"></script>
