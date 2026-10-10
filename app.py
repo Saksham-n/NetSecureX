@@ -12,7 +12,7 @@ import smtplib
 import threading
 from typing import Dict, Any
 
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, make_response
 
 from netsecurex.config import load_config
 from netsecurex.db.storage import DatabaseStorage
@@ -139,6 +139,133 @@ def api_send_custom():
 
     result_status = _send_smtp(mail_from, mail_to, msg.as_bytes())
     return jsonify({"status": "ok", "smtp_result": result_status})
+
+
+def _cors_response(data: dict, status: int = 200):
+    """Wraps jsonify response with CORS headers for the browser extension."""
+    resp = make_response(jsonify(data), status)
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    resp.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    resp.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    return resp
+
+
+@app.route("/api/scan_url", methods=["POST", "OPTIONS"])
+def api_scan_url():
+    """Extension endpoint: scans a single URL via Safe Browsing + heuristics."""
+    if request.method == "OPTIONS":
+        return _cors_response({})
+
+    data = request.get_json() or {}
+    url = data.get("url", "").strip()
+    if not url:
+        return _cors_response({"error": "No URL provided"}, 400)
+
+    try:
+        results = engine.url_scanner.scan_urls([url])
+        if results:
+            r = results[0]
+            risk = "HIGH" if r.is_malicious else ("MEDIUM" if r.suspicious_patterns else "LOW")
+            return _cors_response({
+                "url": r.url,
+                "domain": r.domain,
+                "is_malicious": r.is_malicious,
+                "threat_type": r.threat_type,
+                "suspicious_patterns": r.suspicious_patterns,
+                "details": r.details,
+                "source": r.source,
+                "cached": r.cached,
+                "risk_level": risk,
+            })
+        return _cors_response({"url": url, "is_malicious": False, "risk_level": "LOW", "details": "No result"})
+    except Exception as ex:
+        logger.error(f"Extension URL scan error: {ex}")
+        return _cors_response({"error": str(ex)}, 500)
+
+
+@app.route("/api/scan_email", methods=["POST", "OPTIONS"])
+def api_scan_email():
+    """Extension endpoint: heuristic-only analysis of pasted email fields."""
+    if request.method == "OPTIONS":
+        return _cors_response({})
+
+    data = request.get_json() or {}
+    display_name    = data.get("display_name", "")
+    from_address    = data.get("from_address", "")
+    from_domain     = from_address.split("@")[-1].lower().strip() if "@" in from_address else ""
+    reply_to        = data.get("reply_to", "")
+    subject         = data.get("subject", "")
+    body_text       = data.get("body", "")
+    extracted_urls  = data.get("urls", [])
+
+    # Heuristic analysis
+    try:
+        from urllib.parse import urlparse
+        extracted_domains = []
+        for u in extracted_urls:
+            try:
+                d = urlparse(u).netloc.split(":")[0].lower()
+                if d:
+                    extracted_domains.append(d)
+            except Exception:
+                pass
+
+        heuristic_res = engine.heuristic_scanner.analyze(
+            display_name=display_name,
+            from_address=from_address,
+            from_domain=from_domain,
+            reply_to_address=reply_to,
+            subject=subject,
+            body_text=body_text,
+            extracted_domains=extracted_domains,
+        )
+
+        # URL scan if any URLs were provided
+        url_results = []
+        if extracted_urls:
+            for scan_res in engine.url_scanner.scan_urls(extracted_urls[:20]):
+                url_results.append({
+                    "url": scan_res.url,
+                    "domain": scan_res.domain,
+                    "is_malicious": scan_res.is_malicious,
+                    "threat_type": scan_res.threat_type,
+                    "suspicious_patterns": scan_res.suspicious_patterns,
+                    "risk": "HIGH" if scan_res.is_malicious else ("MEDIUM" if scan_res.suspicious_patterns else "LOW"),
+                })
+
+        # Compute composite score
+        score = min(heuristic_res.total_heuristic_score, 100.0)
+        has_malicious_url = any(u["is_malicious"] for u in url_results)
+        has_suspicious_url = any(u["suspicious_patterns"] for u in url_results)
+
+        if has_malicious_url:
+            score = min(score + 80.0, 100.0)
+        elif has_suspicious_url:
+            score = min(score + 20.0, 100.0)
+
+        if score >= 70:
+            risk_level = "HIGH"
+        elif score >= 30:
+            risk_level = "MEDIUM"
+        else:
+            risk_level = "LOW"
+
+        return _cors_response({
+            "risk_level": risk_level,
+            "total_score": round(score, 1),
+            "urgency_detected": heuristic_res.urgency_detected,
+            "urgency_matches": heuristic_res.urgency_matches,
+            "display_name_spoofed": heuristic_res.display_name_spoofed,
+            "display_name_reason": heuristic_res.display_name_reason,
+            "lookalike_detected": heuristic_res.lookalike_detected,
+            "lookalike_matches": heuristic_res.lookalike_matches,
+            "reasons": heuristic_res.reasons,
+            "url_results": url_results,
+        })
+    except Exception as ex:
+        logger.error(f"Extension email scan error: {ex}")
+        return _cors_response({"error": str(ex)}, 500)
+
 
 
 def _send_smtp(mail_from: str, rcpt_to: str, raw_bytes: bytes) -> str:

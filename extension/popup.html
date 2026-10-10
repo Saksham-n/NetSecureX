@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NetSecureX Shield</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <!-- ── Header ─────────────────────────────────────────────────── -->
+  <header>
+    <div class="logo">
+      <div class="shield-icon">🛡️</div>
+      <div>
+        <div class="logo-name">NetSecureX</div>
+        <div class="logo-tagline">Phishing &amp; Link Shield</div>
+      </div>
+    </div>
+    <div id="server-status" class="status-dot status-unknown" title="Server status"></div>
+  </header>
+
+  <!-- ── Tabs ───────────────────────────────────────────────────── -->
+  <div class="tab-bar">
+    <button class="tab active" data-tab="url" id="tab-url">🔗 URL Scan</button>
+    <button class="tab" data-tab="email" id="tab-email">📧 Email Scan</button>
+    <button class="tab" data-tab="page" id="tab-page">🌐 Page Info</button>
+  </div>
+
+  <!-- ════════════════════ TAB: URL Scan ═══════════════════════════ -->
+  <div class="tab-content active" id="tab-content-url">
+    <div class="input-group">
+      <label for="url-input">URL to scan</label>
+      <input type="url" id="url-input" placeholder="https://example.com/login?redirect=..." autocomplete="off" spellcheck="false">
+    </div>
+    <button class="btn btn-primary" id="btn-scan-url">
+      <span class="btn-icon">🔍</span> Scan URL
+    </button>
+    <button class="btn btn-secondary" id="btn-scan-page-url">
+      <span class="btn-icon">📋</span> Scan Current Page URL
+    </button>
+
+    <div class="result-card hidden" id="url-result">
+      <div class="result-header">
+        <span id="url-risk-badge" class="risk-badge">—</span>
+        <span id="url-score" class="score-text"></span>
+      </div>
+      <div class="result-domain" id="url-domain"></div>
+      <div class="result-details" id="url-details"></div>
+      <div class="result-tags" id="url-tags"></div>
+    </div>
+    <div class="error-box hidden" id="url-error"></div>
+  </div>
+
+  <!-- ════════════════════ TAB: Email Scan ═════════════════════════ -->
+  <div class="tab-content" id="tab-content-email">
+    <div class="input-group">
+      <label for="email-from">From Address</label>
+      <input type="email" id="email-from" placeholder="sender@example.com" autocomplete="off">
+    </div>
+    <div class="input-group">
+      <label for="email-display">Display Name</label>
+      <input type="text" id="email-display" placeholder="e.g. CEO, Finance Director" autocomplete="off">
+    </div>
+    <div class="input-group">
+      <label for="email-subject">Subject Line</label>
+      <input type="text" id="email-subject" placeholder="e.g. Urgent: Wire Transfer Required" autocomplete="off">
+    </div>
+    <div class="input-group">
+      <label for="email-body">Body Snippet</label>
+      <textarea id="email-body" rows="3" placeholder="Paste relevant email body text here…"></textarea>
+    </div>
+    <div class="input-group">
+      <label for="email-urls">URLs in Email (one per line)</label>
+      <textarea id="email-urls" rows="2" placeholder="https://login.micrrosoft.com&#10;https://bit.ly/abc123"></textarea>
+    </div>
+    <button class="btn btn-primary" id="btn-scan-email">
+      <span class="btn-icon">🔬</span> Analyse Email
+    </button>
+
+    <div class="result-card hidden" id="email-result">
+      <div class="result-header">
+        <span id="email-risk-badge" class="risk-badge">—</span>
+        <span id="email-score" class="score-text"></span>
+      </div>
+      <div class="threat-chips" id="email-threat-chips"></div>
+      <div class="result-details" id="email-details"></div>
+      <div class="url-list" id="email-url-list"></div>
+    </div>
+    <div class="error-box hidden" id="email-error"></div>
+  </div>
+
+  <!-- ════════════════════ TAB: Page Info ══════════════════════════ -->
+  <div class="tab-content" id="tab-content-page">
+    <div class="page-stat-grid">
+      <div class="page-stat" id="stat-links">
+        <div class="stat-val" id="stat-links-val">—</div>
+        <div class="stat-label">External Links</div>
+      </div>
+      <div class="page-stat" id="stat-risk">
+        <div class="stat-val" id="stat-risk-val">—</div>
+        <div class="stat-label">Page Risk</div>
+      </div>
+      <div class="page-stat" id="stat-scanned">
+        <div class="stat-val" id="stat-scanned-val">—</div>
+        <div class="stat-label">Scanned</div>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="btn-scan-all-links">
+      <span class="btn-icon">⚡</span> Scan All Page Links
+    </button>
+    <div class="links-list" id="page-links-list"></div>
+  </div>
+
+  <!-- ── Footer ─────────────────────────────────────────────────── -->
+  <footer>
+    <span>NetSecureX · College Project</span>
+    <a href="http://127.0.0.1:5000" target="_blank" id="open-dashboard">Open Dashboard →</a>
+  </footer>
+
+  <script src="popup.js"></script>
+</body>
+</html>
